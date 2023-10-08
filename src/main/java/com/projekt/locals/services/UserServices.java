@@ -31,11 +31,12 @@ public class UserServices implements UserDetailsService {
     }
 
     @Transactional
+    //TODO mess with password encoder
     public void signUpUser(User u) {
         if (userRepository.findUserByEmail(u.getEmail()).isPresent())
             throw new UsernameNotFoundException("User with this email already exists");
-PasswordEncoder ps = passwordEncoder();
-        u.setPassword(ps.encode(u.getPassword()));
+//PasswordEncoder ps = passwordEncoder();
+//        u.setPassword(ps.encode(u.getPassword()));
         userRepository.save(u);
     }
 //
@@ -69,8 +70,5 @@ PasswordEncoder ps = passwordEncoder();
 //    }
 
 
-    public PasswordEncoder passwordEncoder () {
-        return NoOpPasswordEncoder.getInstance();
-        // return new BCryptPasswordEncoder();
-    }
+
 }

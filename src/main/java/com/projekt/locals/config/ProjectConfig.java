@@ -5,7 +5,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
-import com.projekt.locals.config.security.filters.CustomAuthenticationFilter;
+//import com.projekt.locals.config.security.filters.CustomAuthenticationFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +43,8 @@ public class ProjectConfig {
 
 //     http://localhost:8080/oauth2/authorize?response_type=code&client_id=client&scope=openid&redirect_uri=http://example.com/auth&code_challenge=QYPAZ5NU8yvtlQ9erXrUYR-T5AGCjCF47vN-KsaI2A8&code_challenge_method=S256
 
-   private final CustomAuthenticationFilter customAuthenticationFilter;
+    //Custom Authentication filter (all the security folder)
+  // private final CustomAuthenticationFilter customAuthenticationFilter;
 
     @Bean
     @Order(1)
@@ -70,8 +71,9 @@ public class ProjectConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception {
-     //   http.formLogin(Customizer.withDefaults());
-        http.addFilterAt(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.formLogin(Customizer.withDefaults());
+        //Custom auth filter
+      //  http.addFilterAt(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 
         http.authorizeHttpRequests(client ->
@@ -120,6 +122,12 @@ public class ProjectConfig {
             context.getClaims().claim("authorities",authorities.stream().map(a -> a.getAuthority()).toList());
         };
 
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder () {
+        return NoOpPasswordEncoder.getInstance();
+        // return new BCryptPasswordEncoder();
     }
 
 
