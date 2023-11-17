@@ -17,7 +17,6 @@ public class SecurityUser implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        //TODO Check ::
         return user.getRoles()
                 .stream()
                 .map(SecurityRole::new)

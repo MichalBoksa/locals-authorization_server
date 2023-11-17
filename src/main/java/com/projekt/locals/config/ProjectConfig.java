@@ -6,6 +6,8 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
 //import com.projekt.locals.config.security.filters.CustomAuthenticationFilter;
+import com.projekt.locals.entities.User;
+import com.projekt.locals.security.SecurityUser;
 import lombok.AllArgsConstructor;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.context.annotation.Bean;
@@ -17,9 +19,13 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
@@ -42,6 +48,7 @@ import java.util.UUID;
 public class ProjectConfig {
 
 //     http://localhost:8080/oauth2/authorize?response_type=code&client_id=client&scope=openid&redirect_uri=http://example.com/auth&code_challenge=QYPAZ5NU8yvtlQ9erXrUYR-T5AGCjCF47vN-KsaI2A8&code_challenge_method=S256
+//     http://192.168.32.6:8080/oauth2/authorize?response_type=code&client_id=client&scope=openid&redirect_uri=http://example.com/auth&code_challenge=QYPAZ5NU8yvtlQ9erXrUYR-T5AGCjCF47vN-KsaI2A8&code_challenge_method=S256
 
     //Custom Authentication filter (all the security folder)
   // private final CustomAuthenticationFilter customAuthenticationFilter;
@@ -54,16 +61,11 @@ public class ProjectConfig {
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                         .oidc(Customizer.withDefaults());
 
-        //TODO CHECK new LoginUrlAuthenticationEntryPoint("/login"),
-        //                                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
         http.exceptionHandling(
-                client ->
-                        client.defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint("/login"),
-                                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-                        )
-        );
-        http.csrf().disable();
+                        exceptions -> exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+                        .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+        ;
+        //http.csrf().disable();
 
         return http.build();
 
@@ -71,13 +73,22 @@ public class ProjectConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception {
-        http.formLogin(Customizer.withDefaults());
-        //Custom auth filter
-      //  http.addFilterAt(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.authorizeHttpRequests((authorize) -> authorize
+                        .requestMatchers("/login","/css/**","/register_form","/registerForm").permitAll()
+                        .anyRequest().authenticated()
 
+                ).csrf(AbstractHttpConfigurer::disable)
+                .formLogin(formLogin-> formLogin
+                .loginPage("/login")
+                .defaultSuccessUrl("/success")
+                        .loginProcessingUrl("/login")
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+        );
+//                .formLogin(Customizer.withDefaults());
 
-        http.authorizeHttpRequests(client ->
-                client.anyRequest().authenticated()).csrf(AbstractHttpConfigurer::disable);
+//        http.authorizeHttpRequests(client ->
+//                client.anyRequest().authenticated()).csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
@@ -118,8 +129,11 @@ public class ProjectConfig {
     public OAuth2TokenCustomizer<JwtEncodingContext> oAuth2tokenCustomizer() {
         return context -> {
             var authorities = context.getPrincipal().getAuthorities();
-
+            SecurityUser us = (SecurityUser) context.getPrincipal().getPrincipal();
+            context.getPrincipal().getDetails();
             context.getClaims().claim("authorities",authorities.stream().map(a -> a.getAuthority()).toList());
+            context.getClaims().claim("username",us.getUsername());
+
         };
 
     }
@@ -129,6 +143,7 @@ public class ProjectConfig {
         return NoOpPasswordEncoder.getInstance();
         // return new BCryptPasswordEncoder();
     }
+
 
 
 }

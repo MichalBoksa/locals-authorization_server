@@ -4,32 +4,42 @@ import com.projekt.locals.entities.User;
 import com.projekt.locals.repositories.UserRepository;
 import com.projekt.locals.services.UserServices;
 import lombok.AllArgsConstructor;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-@RestController
+@Controller
 @AllArgsConstructor
+@EnableWebSecurity
 public class RegistrationController {
 
     private UserServices userServices;
     private UserRepository userRepository;
 
-    //TODO test use, delete later
     @GetMapping("/users/getUser/{email}")
-    public Optional<User> getAllUsers(@PathVariable String email) {
+    public Optional<User> getUser(@PathVariable String email) {
         return userRepository.findUserByEmail(email);
     }
 
-    //TODO maybe add http status in return
-    @PostMapping("/signUp")
-    public void signUp (@RequestBody User u) {
-        userServices.signUpUser(u);
+
+    @GetMapping(value="/login")
+    public String login() {
+        return "login";
     }
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "HELLO";
+    @GetMapping(value="/register_form")
+    public String register(Model model) {
+        model.addAttribute("user",new User());
+        return "register_form";
+    }
+    //TODO maybe add http status in return
+    @PostMapping("/register/save")
+    public String signUp (@ModelAttribute User user) {
+        userServices.signUpUser(user);
+        return "register_form";
     }
 
 
