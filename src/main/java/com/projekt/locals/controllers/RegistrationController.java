@@ -42,6 +42,11 @@ public class RegistrationController {
         return "register_form";
     }
 
+    @PutMapping("/updateToGuide/{email}")
+    public void updateToGuide (@PathVariable String email) {
+        userServices.updateToGuide(email);
+    }
+
 
 //    @PostMapping("/signIn")
 //    public void SignIn()

@@ -25,10 +25,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
+import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
@@ -41,6 +47,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Duration;
 import java.util.UUID;
 
 @Configuration
@@ -74,28 +81,20 @@ public class ProjectConfig {
     @Order(2)
     public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/login","/css/**","/register_form","/registerForm").permitAll()
+                        .requestMatchers("/login","/css/**","/register_form","/register_guide_form","/registerForm").permitAll()
                         .anyRequest().authenticated()
-
                 ).csrf(AbstractHttpConfigurer::disable)
                 .formLogin(formLogin-> formLogin
                 .loginPage("/login")
-                .defaultSuccessUrl("/success")
-                        .loginProcessingUrl("/login")
                         .failureUrl("/login?error=true")
                         .permitAll()
         );
-//                .formLogin(Customizer.withDefaults());
-
-//        http.authorizeHttpRequests(client ->
-//                client.anyRequest().authenticated()).csrf(AbstractHttpConfigurer::disable);
-
         return http.build();
     }
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder().build();
+        return AuthorizationServerSettings.builder().issuer("http://localhost:8080").build();
     }
 
 
@@ -126,6 +125,14 @@ public class ProjectConfig {
     }
 
     @Bean
+    public TokenSettings tokenSettings() {
+        return TokenSettings.builder()
+                .accessTokenTimeToLive(Duration.ofMinutes(45))
+                .refreshTokenTimeToLive(Duration.ofHours(2))
+                .build();
+    }
+
+    @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> oAuth2tokenCustomizer() {
         return context -> {
             var authorities = context.getPrincipal().getAuthorities();
@@ -133,7 +140,6 @@ public class ProjectConfig {
             context.getPrincipal().getDetails();
             context.getClaims().claim("authorities",authorities.stream().map(a -> a.getAuthority()).toList());
             context.getClaims().claim("username",us.getUsername());
-
         };
 
     }
@@ -144,6 +150,13 @@ public class ProjectConfig {
         // return new BCryptPasswordEncoder();
     }
 
+//    @Bean
+//    public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+//        OAuth2TokenValidator<Jwt> withClockSkew = new DelegatingOAuth2TokenValidator<>(
+//                new JwtTimestampValidator(Duration.ofSeconds(60)),
+//                new JwtIssuerValidator(issuerUri));
+//        return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
+//    }
 
 
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -38,6 +39,15 @@ public class UserServices implements UserDetailsService {
 //PasswordEncoder ps = passwordEncoder();
 //        u.setPassword(ps.encode(u.getPassword()));
         userRepository.save(u);
+    }
+
+    public void updateToGuide(String email) {
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Username with email" + email + "doesn't exists"));
+        Set roles = user.getRoles();
+        roles.add("GUIDE");
+        user.setRoles(roles);
+        userRepository.save(user);
     }
 //
 //    //TODO CHECK IF THIS METHOD IS CORRECT
