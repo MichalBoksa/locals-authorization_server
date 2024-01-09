@@ -50,8 +50,16 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.util.UUID;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
+
 @Configuration
 @AllArgsConstructor
+@EnableWebSecurity
 public class ProjectConfig {
 
 //     http://localhost:8080/oauth2/authorize?response_type=code&client_id=client&scope=openid&redirect_uri=http://example.com/auth&code_challenge=QYPAZ5NU8yvtlQ9erXrUYR-T5AGCjCF47vN-KsaI2A8&code_challenge_method=S256
@@ -70,25 +78,44 @@ public class ProjectConfig {
 
         http.exceptionHandling(
                         exceptions -> exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
-                        .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+                        .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+                .authorizeHttpRequests();
         ;
-        //http.csrf().disable();
+      //  http.csrf().disable();
 
         return http.build();
 
     }
+//    @Bean
+//    @Order(2)
+//    public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception {
+//        http.authorizeHttpRequests((authorize) -> authorize
+//                        .requestMatchers("/login","/css/**","/register_form","/register_guide_form","/registerForm","/updateToGuide/{email}","/oauth2/authorize","/oauth2/token").permitAll()
+//                        .anyRequest().authenticated()
+//                ).csrf(AbstractHttpConfigurer::disable)
+//                .formLogin(formLogin-> formLogin
+//                .loginPage("/login")
+//                        .failureUrl("/login?error=true")
+//                        .permitAll()
+//        );
+//        return http.build();
+//    }
+
     @Bean
-    @Order(2)
-    public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/login","/css/**","/register_form","/register_guide_form","/registerForm").permitAll()
-                        .anyRequest().authenticated()
-                ).csrf(AbstractHttpConfigurer::disable)
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests((authorize) -> authorize
+                        .requestMatchers("/login", "/register_form", "/register/save", "/oauth2/authorize").permitAll()
+                        .anyRequest().authenticated())
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt).csrf(AbstractHttpConfigurer::disable)
                 .formLogin(formLogin-> formLogin
                 .loginPage("/login")
                         .failureUrl("/login?error=true")
                         .permitAll()
-        );
+                );
+
+        // Dodatkowe konfiguracje mogą być tutaj, jak CSRF, CORS, itp.
+
         return http.build();
     }
 
@@ -150,13 +177,9 @@ public class ProjectConfig {
         // return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-//        OAuth2TokenValidator<Jwt> withClockSkew = new DelegatingOAuth2TokenValidator<>(
-//                new JwtTimestampValidator(Duration.ofSeconds(60)),
-//                new JwtIssuerValidator(issuerUri));
-//        return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
-//    }
-
+    @Bean
+    public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+        return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
+    }
 
 }

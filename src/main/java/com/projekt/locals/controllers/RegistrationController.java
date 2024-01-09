@@ -13,15 +13,22 @@ import java.util.Optional;
 
 @Controller
 @AllArgsConstructor
-@EnableWebSecurity
+
 public class RegistrationController {
 
     private UserServices userServices;
     private UserRepository userRepository;
 
-    @GetMapping("/users/getUser/{email}")
+    @GetMapping(path = "/users/getUser/{email}")
     public Optional<User> getUser(@PathVariable String email) {
         return userRepository.findUserByEmail(email);
+    }
+
+    @GetMapping(path = "/test")
+    @ResponseBody
+    public Integer test() {
+        Integer a =4;
+        return a;
     }
 
 
@@ -43,9 +50,13 @@ public class RegistrationController {
     }
 
     @PutMapping("/updateToGuide/{email}")
+    @ResponseBody
     public void updateToGuide (@PathVariable String email) {
         userServices.updateToGuide(email);
     }
+
+    @DeleteMapping("/deleteUser/{email}")
+    public void deleteUser(@PathVariable String email){userServices.deleteUser(email);}
 
 
 //    @PostMapping("/signIn")

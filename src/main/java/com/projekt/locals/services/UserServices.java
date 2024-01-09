@@ -1,6 +1,8 @@
 package com.projekt.locals.services;
 
+import com.projekt.locals.entities.Role;
 import com.projekt.locals.entities.User;
+import com.projekt.locals.repositories.RoleRepository;
 import com.projekt.locals.repositories.UserRepository;
 import com.projekt.locals.security.SecurityUser;
 import lombok.AllArgsConstructor;
@@ -22,8 +24,8 @@ public class UserServices implements UserDetailsService {
 
    // private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
-    //TODO check if email replace username
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var user = userRepository.findUserByEmail(username);
@@ -36,7 +38,7 @@ public class UserServices implements UserDetailsService {
     public void signUpUser(User u) {
         if (userRepository.findUserByEmail(u.getEmail()).isPresent())
             throw new UsernameNotFoundException("User with this email already exists");
-//PasswordEncoder ps = passwordEncoder();
+        //PasswordEncoder ps = passwordEncoder();
 //        u.setPassword(ps.encode(u.getPassword()));
         userRepository.save(u);
     }
@@ -44,10 +46,17 @@ public class UserServices implements UserDetailsService {
     public void updateToGuide(String email) {
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Username with email" + email + "doesn't exists"));
-        Set roles = user.getRoles();
-        roles.add("GUIDE");
-        user.setRoles(roles);
+        Role role = roleRepository.findRoleByName("GUIDE")
+                .orElseThrow(() -> new RuntimeException(""));
+        user.getRoles().clear();
+        user.getRoles().add(role);
         userRepository.save(user);
+    }
+
+    public void deleteUser(String email) {
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Username with email" + email + "doesn't exists"));
+        userRepository.delete(user);
     }
 //
 //    //TODO CHECK IF THIS METHOD IS CORRECT
