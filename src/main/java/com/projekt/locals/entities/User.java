@@ -1,5 +1,6 @@
 package com.projekt.locals.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,8 +26,14 @@ public class User {
     private String password;
     @Column(name="phone_number")
     private String phoneNumber;
+    @Column(name="is_guide")
+    private boolean isGuide;
+    @Column(name="image_uri")
+    private String imageUri;
+
 
     @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonBackReference
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))

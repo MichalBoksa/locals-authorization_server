@@ -20,17 +20,17 @@ public class RegistrationController {
     private UserRepository userRepository;
 
     @GetMapping(path = "/users/getUser/{email}")
-    public Optional<User> getUser(@PathVariable String email) {
-        return userRepository.findUserByEmail(email);
-    }
-
-    @GetMapping(path = "/test")
     @ResponseBody
-    public Integer test() {
-        Integer a =4;
-        return a;
+    public User getUser(@PathVariable String email) {
+       return userServices.getUser(email);
+       // return userRepository.findUserByEmail(email);
     }
 
+    @GetMapping(path = "/users/getUserById/{id}")
+    @ResponseBody
+    public Optional<User> getUserById(@PathVariable int id) {
+        return userRepository.findUserById(id);
+    }
 
     @GetMapping(value="/login")
     public String login() {
@@ -46,7 +46,7 @@ public class RegistrationController {
     @PostMapping("/register/save")
     public String signUp (@ModelAttribute User user) {
         userServices.signUpUser(user);
-        return "register_form";
+        return "login";
     }
 
     @PutMapping("/updateToGuide/{email}")

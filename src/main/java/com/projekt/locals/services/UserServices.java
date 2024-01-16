@@ -58,6 +58,12 @@ public class UserServices implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Username with email" + email + "doesn't exists"));
         userRepository.delete(user);
     }
+
+    public User getUser(String email) {
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Username with email" + email + "doesn't exists"));
+        return user;
+    }
 //
 //    //TODO CHECK IF THIS METHOD IS CORRECT
 //    public void updateEmail(Integer id, String email) {

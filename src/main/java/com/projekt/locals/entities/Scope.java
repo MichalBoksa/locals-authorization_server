@@ -17,7 +17,6 @@ public class Scope {
 
     @ManyToOne
     private Client client;
-//TODO check var
     public static Scope from(String scope, Client client) {
         var s = new Scope();
         s.setScope(scope);
