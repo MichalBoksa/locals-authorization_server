@@ -1,3 +1,7 @@
+//CUSTOM SECURITY FILTER NOT NEEDED TO PROJECT RIGHT NOW, BUT FOR SURE INTERESTING
+
+
+
 //package com.projekt.locals.config.security.filters;
 //
 //import com.projekt.locals.config.security.authentication.CustomAuthentication;

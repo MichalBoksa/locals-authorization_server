@@ -64,36 +64,28 @@ public class UserServices implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Username with email" + email + "doesn't exists"));
         return user;
     }
-//
-//    //TODO CHECK IF THIS METHOD IS CORRECT
-//    public void updateEmail(Integer id, String email) {
-//
-//        User user = userRepository.findUserById(id);
-//        if (user == null)
-//            throw new UsernameNotFoundException("User w doesn't exists");
-//
-//        user.setEmail(email);
-//        userRepository.save(user);
-//    }
-//
-//    public void updatePhone(Integer id, String phoneNum) {
-//        User user = userRepository.findUserById(id);
-//        if (user == null)
-//            throw new UsernameNotFoundException("User w doesn't exists");
-//
-//        user.setPhoneNumber(phoneNum);
-//        userRepository.save(user);
-//    }
-//
-//    public void updatePassword(Integer id, String password) {
-//        User user = userRepository.findUserById(id);
-//        if (user == null)
-//            throw new UsernameNotFoundException("User doesn't exists");
-//
-//        user.setPassword(passwordEncoder.encode(password));
-//        userRepository.save(user);
-//    }
 
+    public void updateImage(String email, String image) {
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Username with email" + email + "doesn't exists"));
+        user.setImageUri(image);
+        userRepository.save(user);
+    }
 
+    public void updateEmail(String email, String newEmail) {
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Username with email" + email + "doesn't exists"));
+        newEmail = newEmail.substring(1,newEmail.length()-1);
+        user.setEmail(newEmail);
+        userRepository.save(user);
+    }
+
+    public void updatePhone(String email, String phone) {
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Username with email" + email + "doesn't exists"));
+        phone = phone.substring(1,phone.length()-1);
+        user.setPhoneNumber(phone);
+        userRepository.save(user);
+    }
 
 }

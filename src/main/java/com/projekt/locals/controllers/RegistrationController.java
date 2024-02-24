@@ -56,15 +56,26 @@ public class RegistrationController {
     }
 
     @DeleteMapping("/deleteUser/{email}")
+    @ResponseBody
     public void deleteUser(@PathVariable String email){userServices.deleteUser(email);}
 
+    @PutMapping("/users/updateImage/{email}")
+    @ResponseBody
+    public void updateImage(@PathVariable String email, @RequestBody String image) {
+       userServices.updateImage(email, image);
+    }
 
-//    @PostMapping("/signIn")
-//    public void SignIn()
+    @PutMapping("/users/updateEmail/{email}")
+    @ResponseBody
+    public void updateEmail(@PathVariable String email, @RequestBody String newEmail) {
+        userServices.updateEmail(email, newEmail);
+    }
 
-//        //TODO changerequestbody to pathrequest
-//    @PostMapping("/updatePassword")
-//    public void updateUser (@RequestBody int id, @RequestBody String value) {
-//        userServices.updatePassword(id,value);
-//    }
+    @PutMapping("/users/updatePhone/{email}")
+    @ResponseBody
+    public void updatePhone(@PathVariable String email, @RequestBody String phone) {
+        userServices.updatePhone(email, phone);
+    }
+
+
 }

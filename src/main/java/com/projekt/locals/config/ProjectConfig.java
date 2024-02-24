@@ -80,8 +80,6 @@ public class ProjectConfig {
                         exceptions -> exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
                         .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .authorizeHttpRequests();
-        ;
-      //  http.csrf().disable();
 
         return http.build();
 
@@ -102,6 +100,7 @@ public class ProjectConfig {
 //    }
 
     @Bean
+    @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> authorize
@@ -114,8 +113,6 @@ public class ProjectConfig {
                         .permitAll()
                 );
 
-        // Dodatkowe konfiguracje mogą być tutaj, jak CSRF, CORS, itp.
-
         return http.build();
     }
 
@@ -123,8 +120,6 @@ public class ProjectConfig {
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder().issuer("http://localhost:8080").build();
     }
-
-
 
 
 //    //TODO CHECK jwkSOURCE

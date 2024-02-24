@@ -1,3 +1,6 @@
+//CUSTOM SECURITY FILTER NOT NEEDED TO PROJECT RIGHT NOW, BUT FOR SURE INTERESTING
+
+
 //package com.projekt.locals.config.security.authentication;
 //
 //import com.projekt.locals.entities.User;
